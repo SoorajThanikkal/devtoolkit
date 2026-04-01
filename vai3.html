@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Initial attractive landing page */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #16213e);
+  transition: all 0.5s;
+}
+
+.landing h1 {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  background: linear-gradient(90deg, #00d2ff, #7b2ff7, #ff0080);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.landing p {
+  color: #888;
+  margin-bottom: 40px;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.claim-btn {
+  padding: 15px 50px;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  background: linear-gradient(135deg, #7b2ff7, #ff0080);
+  border: none;
+  color: white;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 30px rgba(123, 47, 247, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.claim-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 50px rgba(123, 47, 247, 0.6);
+}
+
+.claim-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+/* Fake loading screen */
+.loading-screen {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0a0a0a;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-screen.active {
+  display: flex;
+}
+
+.loading-bar-container {
+  width: min(80%, 400px);
+  height: 6px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7b2ff7, #ff0080);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.loading-text {
+  color: #666;
+  font-size: 14px;
+  margin-top: 15px;
+  font-family: 'Courier New', monospace;
+}
+
+/* BSOD Screen */
+.bsod {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0078d7;
+  z-index: 200;
+  flex-direction: column;
+  padding: clamp(30px, 8vw, 120px);
+  font-family: 'Segoe UI', sans-serif;
+  cursor: none;
+}
+
+.bsod.active {
+  display: flex;
+}
+
+.bsod .sad-face {
+  font-size: clamp(60px, 15vw, 120px);
+  margin-bottom: 20px;
+}
+
+.bsod h1 {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 400;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.bsod p {
+  font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+  color: white;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.bsod .progress-text {
+  margin-top: 30px;
+  font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+  color: white;
+}
+
+.bsod .qr-code {
+  width: clamp(60px, 12vw, 100px);
+  height: clamp(60px, 12vw, 100px);
+  background: white;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.qr-inner {
+  width: 85%;
+  height: 85%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.qr-inner span {
+  background: #000;
+}
+
+/* Kernel Panic (macOS) */
+.kernel-panic {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20px);
+  cursor: none;
+}
+
+.kernel-panic.active {
+  display: flex;
+}
+
+.kernel-box {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: clamp(25px, 5vw, 50px);
+  max-width: min(90%, 500px);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.kernel-box .power-icon {
+  font-size: clamp(40px, 8vw, 60px);
+  margin-bottom: 20px;
+}
+
+.kernel-box h2 {
+  color: white;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.kernel-box p {
+  color: #999;
+  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+  line-height: 1.6;
+}
+
+/* Linux Kernel Panic */
+.linux-panic {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 200;
+  padding: clamp(10px, 3vw, 30px);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  cursor: none;
+}
+
+.linux-panic.active {
+  display: block;
+}
+
+.linux-panic .terminal-text {
+  color: #ccc;
+  font-size: clamp(0.55rem, 1.3vw, 0.8rem);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.linux-panic .panic-line {
+  color: #ff4444;
+}
+
+/* Mobile crash screens */
+.mobile-crash {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.mobile-crash.android {
+  background: #000;
+}
+
+.mobile-crash.ios {
+  background: #000;
+}
+
+.mobile-crash.active {
+  display: flex;
+}
+
+.android-crash-icon {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #ff4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #ff4444;
+  margin-bottom: 30px;
+}
+
+.android-crash-text {
+  color: white;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.android-crash-text h2 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.android-crash-text p {
+  font-size: 0.85rem;
+  color: #999;
+  line-height: 1.5;
+}
+
+.android-btn {
+  margin-top: 30px;
+  padding: 10px 30px;
+  background: transparent;
+  border: 1px solid #4285f4;
+  color: #4285f4;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Spinner for iOS */
+.ios-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Glitch effects */
+.glitch-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 150;
+  pointer-events: none;
+}
+
+.glitch-overlay.active {
+  display: block;
+  animation: glitch-anim 0.1s infinite;
+}
+
+@keyframes glitch-anim {
+  0% { 
+    background: transparent;
+    clip-path: inset(20% 0 60% 0);
+  }
+  20% { 
+    background: rgba(255,0,0,0.03);
+    clip-path: inset(60% 0 10% 0);
+    transform: translateX(-5px);
+  }
+  40% { 
+    background: rgba(0,255,0,0.03);
+    clip-path: inset(10% 0 40% 0);
+    transform: translateX(5px);
+  }
+  60% { 
+    background: transparent;
+    clip-path: inset(50% 0 20% 0);
+    transform: translateX(-3px);
+  }
+  80% { 
+    background: rgba(0,0,255,0.03);
+    clip-path: inset(30% 0 50% 0);
+    transform: translateX(3px);
+  }
+  100% { 
+    background: transparent;
+    clip-path: inset(70% 0 5% 0);
+  }
+}
+
+/* Screen flicker */
+.flicker {
+  animation: flicker-anim 0.15s ease-in-out;
+}
+
+@keyframes flicker-anim {
+  0% { opacity: 1; }
+  25% { opacity: 0; }
+  50% { opacity: 1; }
+  75% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Screen artifacts */
+.artifact {
+  position: fixed;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.03) 2px,
+    rgba(0, 255, 0, 0.03) 4px
+  );
+  z-index: 160;
+  pointer-events: none;
+}
+
+/* File deletion animation */
+.file-delete-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0a0a0a;
+  z-index: 190;
+  padding: clamp(15px, 4vw, 40px);
+  font-family: 'Courier New', monospace;
+}
+
+.file-delete-overlay.active {
+  display: block;
+}
+
+.file-delete-header {
+  color: #ff4444;
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-delete-header .warning-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: #ff4444;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.file-lines {
+  color: #00ff41;
+  font-size: clamp(0.6rem, 1.4vw, 0.8rem);
+  line-height: 1.5;
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.file-line {
+  opacity: 0;
+  animation: file-appear 0.1s forwards;
+}
+
+.file-line.deleted {
+  color: #ff4444;
+  text-decoration: line-through;
+}
+
+@keyframes file-appear {
+  to { opacity: 1; }
+}
+
+/* Reveal screen */
+.reveal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.reveal.active {
+  display: flex;
+}
+
+.reveal-text {
+  font-size: clamp(2rem, 8vw, 5rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #ff0080, #7b2ff7, #00d2ff, #ff0080);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 2s ease infinite;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.reveal-sub {
+  color: #666;
+  font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+  margin-top: 20px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.reveal-emoji {
+  font-size: clamp(3rem, 10vw, 6rem);
+  margin-bottom: 20px;
+  animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 301;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    top: 110vh;
+    transform: rotate(720deg);
+  }
+}
+
+/* Screen tearing effect */
+.screen-tear {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.8);
+  z-index: 155;
+  pointer-events: none;
+  display: none;
+}
+
+.screen-tear.active {
+  display: block;
+  animation: tear-move 0.05s linear infinite;
+}
+
+@keyframes tear-move {
+  0% { top: 0; }
+  100% { top: 100vh; }
+}
+
+/* Cursor trail for desktop */
+.cursor-trail {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  background: white;
+  transition: opacity 0.3s;
+}
+
+/* Permission popup fake */
+.fake-permission {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2d2d2d;
+  border-radius: 14px;
+  padding: 25px;
+  z-index: 180;
+  max-width: min(90%, 350px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  text-align: center;
+}
+
+.fake-permission.active {
+  display: block;
+}
+
+.fake-permission h3 {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.fake-permission p {
+  color: #999;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.fake-permission-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.fake-permission-btns button {
+  padding: 8px 25px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.perm-deny {
+  background: #3a3a3c;
+  color: #4285f4;
+}
+
+.perm-allow {
+  background: #4285f4;
+  color: white;
+}
+
+/* Smoke effect */
+.smoke-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 195;
+  pointer-events: none;
+  display: none;
+}
+
+.smoke-container.active {
+  display: block;
+}
+
+.smoke-particle {
+  position: absolute;
+  bottom: -20px;
+  width: clamp(100px, 20vw, 200px);
+  height: clamp(100px, 20vw, 200px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100,100,100,0.4), transparent);
+  animation: smoke-rise linear forwards;
+  filter: blur(20px);
+}
+
+@keyframes smoke-rise {
+  0% {
+    bottom: -20px;
+    opacity: 0.6;
+    transform: scale(0.5);
+  }
+  100% {
+    bottom: 100vh;
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+/* Dead pixels */
+.dead-pixel {
+  position: fixed;
+  background: #000;
+  z-index: 145;
+  pointer-events: none;
+}
+
+/* Static noise */
+.static-noise {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 198;
+  opacity: 0.8;
+}
+
+.static-noise.active {
+  display: block;
+}
+
+.static-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Battery warning */
+.battery-warning {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #1c1c1e;
+  border-radius: 14px;
+  padding: 15px 20px;
+  z-index: 175;
+  box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+  max-width: min(85%, 320px);
+  animation: slide-in 0.3s ease;
+}
+
+.battery-warning.active {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.battery-icon {
+  font-size: 1.5rem;
+}
+
+.battery-text h4 {
+  color: #ff3b30;
+  font-size: 0.85rem;
+  margin-bottom: 3px;
+}
+
+.battery-text p {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+/* Overheating effect */
+.overheat-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 140;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(255, 50, 0, 0.15));
+  animation: overheat-pulse 2s ease-in-out infinite;
+}
+
+.overheat-overlay.active {
+  display: block;
+}
+
+@keyframes overheat-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+</style>
+</head>
+<body>
+
+<!-- Landing Page -->
+<div class="landing" id="landing">
+  <h1>🎁 You've Been Selected!</h1>
+  <p>Claim your exclusive developer toolkit — Limited access</p>
+  <button class="claim-btn" id="claimBtn" onclick="startPrank()">Claim Now — Free</button>
+</div>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <p style="color: #fff; font-size: clamp(0.9rem, 2vw, 1.1rem);">Preparing your download...</p>
+  <div class="loading-bar-container">
+    <div class="loading-bar" id="loadingBar"></div>
+  </div>
+  <p class="loading-text" id="loadingText">Initializing...</p>
+</div>
+
+<!-- Battery Warning -->
+<div class="battery-warning" id="batteryWarning">
+  <div class="battery-icon">🪫</div>
+  <div class="battery-text">
+    <h4>Critical Battery</h4>
+    <p>2% remaining. Device will shut down.</p>
+  </div>
+</div>
+
+<!-- Fake Permission Popup -->
+<div class="fake-permission" id="fakePermission">
+  <h3>⚠️ System Access Required</h3>
+  <p>This application requires elevated privileges to access system resources. Grant administrator access?</p>
+  <div class="fake-permission-btns">
+    <button class="perm-deny" onclick="denyPermission()">Deny</button>
+    <button class="perm-allow" onclick="allowPermission()">Allow</button>
+  </div>
+</div>
+
+<!-- File Deletion Overlay -->
+<div class="file-delete-overlay" id="fileDeleteOverlay">
+  <div class="file-delete-header">
+    <div class="warning-icon"></div>
+    <span>CRITICAL SYSTEM PROCESS — DO NOT INTERRUPT</span>
+  </div>
+  <div class="file-lines" id="fileLines"></div>
+</div>
+
+<!-- Glitch Overlay -->
+<div class="glitch-overlay" id="glitchOverlay"></div>
+
+<!-- Screen Tear -->
+<div class="screen-tear" id="screenTear"></div>
+
+<!-- Smoke Effect -->
+<div class="smoke-container" id="smokeContainer"></div>
+
+<!-- Static Noise -->
+<div class="static-noise" id="staticNoise">
+  <canvas class="static-canvas" id="staticCanvas"></canvas>
+</div>
+
+<!-- Overheat Overlay -->
+<div class="overheat-overlay" id="overheatOverlay"></div>
+
+<!-- BSOD (Windows) -->
+<div class="bsod" id="bsod">
+  <div class="sad-face">:(</div>
+  <h1>Your device ran into a problem and needs to restart.</h1>
+  <p>We're just collecting some error info, and then we'll restart for you.</p>
+  <div class="progress-text"><span id="bsodProgress">0</span>% complete</div>
+  <p style="margin-top: 30px;">For more information about this issue and possible fixes, visit<br>https://www.windows.com/stopcode</p>
+  <p style="margin-top: 10px;">If you call a support person, give them this info:<br>Stop code: CRITICAL_PROCESS_DIED<br>What failed: ntoskrnl.exe</p>
+  <div class="qr-code">
+    <div class="qr-inner" id="qrCode"></div>
+  </div>
+</div>
+
+<!-- Kernel Panic (macOS) -->
+<div class="kernel-panic" id="kernelPanic">
+  <div class="kernel-box">
+    <div class="power-icon">⏻</div>
+    <h2>Your computer restarted because of a problem.</h2>
+    <p>Press a key or wait a few seconds to continue starting up.</p>
+    <p style="margin-top: 15px; font-size: clamp(0.65rem, 1.5vw, 0.75rem); color: #666;">
+      Panic(CPU 0 caller 0xffffff80003abc9a): Kernel trap at 0xffffff7f80a1234, type 14=page fault<br>
+      CR0: 0x0000000080010033, CR2: 0xffffff80b5e00000, CR3: 0x000000001a03c000, CR4: 0x00000000001626e0<br>
+      RAX: 0x0000000000000000, RBX: 0xffffff80b5dfa000
+    </p>
+  </div>
+</div>
+
+<!-- Linux Kernel Panic -->
+<div class="linux-panic" id="linuxPanic">
+  <div class="terminal-text" id="linuxTerminal"></div>
+</div>
+
+<!-- Mobile Crash - Android -->
+<div class="mobile-crash android" id="androidCrash">
+  <div class="android-crash-icon">!</div>
+  <div class="android-crash-text">
+    <h2>System UI isn't responding</h2>
+    <p>Do you want to close it? Your device will restart.</p>
+  </div>
+  <button class="android-btn" onclick="androidClose()">Close app</button>
+  <button class="android-btn" style="margin-top: 10px; border-color: #666; color: #666;" onclick="androidWait()">Wait</button>
+</div>
+
+<!-- Mobile Crash - iOS style -->
+<div class="mobile-crash ios" id="iosCrash">
+  <div class="ios-spinner"></div>
+</div>
+
+<!-- Reveal Screen -->
+<div class="reveal" id="reveal">
+  <div class="confetti-container" id="confettiContainer"></div>
+  <div class="reveal-emoji">🎉</div>
+  <div class="reveal-text">APRIL FOOLS!</div>
+  <p class="reveal-sub">Your system is perfectly fine. Nothing was deleted. 😄<br>Got you good, didn't I?</p>
+</div>
+
+<script>
+// ============================================================
+//  DEVICE DETECTION
+// ============================================================
+function getDeviceInfo() {
+  const ua = navigator.userAgent.toLowerCase();
+  const platform = navigator.platform?.toLowerCase() || '';
+
+  const isMobile = /android|iphone|ipad|ipod|mobile/i.test(ua);
+  const isTablet = /ipad|tablet/i.test(ua) || (isMobile && Math.min(window.innerWidth, window.innerHeight) > 600);
+  const isAndroid = /android/i.test(ua);
+  const isIOS = /iphone|ipad|ipod/i.test(ua);
+  const isMac = /mac/i.test(platform) && !isIOS;
+  const isWindows = /win/i.test(platform);
+  const isLinux = /linux/i.test(platform) && !isAndroid;
+
+  return { isMobile, isTablet, isAndroid, isIOS, isMac, isWindows, isLinux };
+}
+
+const device = getDeviceInfo();
+
+// ============================================================
+//  SOUND EFFECTS (procedural)
+// ============================================================
+let audioCtx;
+
+function initAudio() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) {}
+}
+
+function playErrorSound() {
+  if (!audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 800;
+    gain.gain.value = 0.15;
+    osc.start();
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 0.5);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+    osc.stop(audioCtx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+function playGlitchSound() {
+  if (!audioCtx) return;
+  try {
+    const bufferSize = audioCtx.sampleRate * 0.1;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.08;
+    }
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start();
+  } catch(e) {}
+}
+
+function playAlarmSound() {
+  if (!audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'square';
+    osc.frequency.value = 440;
+    gain.gain.value = 0.08;
+    osc.start();
+    const now = audioCtx.currentTime;
+    for (let i = 0; i < 6; i++) {
+      osc.frequency.setValueAtTime(880, now + i * 0.3);
+      osc.frequency.setValueAtTime(440, now + i * 0.3 + 0.15);
+    }
+    gain.gain.setValueAtTime(0.08, now + 1.8);
+    gain.gain.linearRampToValueAtTime(0, now + 2);
+    osc.stop(now + 2);
+  } catch(e) {}
+}
+
+// ============================================================
+//  VIBRATION
+// ============================================================
+function vibrateDevice(pattern) {
+  if (navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+// ============================================================
+//  FULLSCREEN
+// ============================================================
+function goFullscreen() {
+  const el = document.documentElement;
+  try {
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+  } catch(e) {}
+}
+
+// ============================================================
+//  STATIC NOISE CANVAS
+// ============================================================
+function renderStatic() {
+  const canvas = document.getElementById('staticCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  function draw() {
+    if (!document.getElementById('staticNoise').classList.contains('active')) return;
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = Math.random() * 255;
+      data[i] = v;
+      data[i+1] = v;
+      data[i+2] = v;
+      data[i+3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============================================================
+//  QR CODE (fake pattern)
+// ============================================================
+function generateQR() {
+  const qr = document.getElementById('qrCode');
+  for (let i = 0; i < 49; i++) {
+    const span = document.createElement('span');
+    const row = Math.floor(i / 7);
+    const col = i % 7;
+    // Corner patterns
+    const isCorner = (row < 3 && col < 3) || (row < 3 && col > 3) || (row > 3 && col < 3);
+    span.style.background = isCorner || Math.random() > 0.5 ? '#000' : '#fff';
+    qr.appendChild(span);
+  }
+}
+
+// ============================================================
+//  SMOKE EFFECT
+// ============================================================
+function startSmoke() {
+  const container = document.getElementById('smokeContainer');
+  container.classList.add('active');
+  let count = 0;
+  const interval = setInterval(() => {
+    if (count > 30) { clearInterval(interval); return; }
+    const particle = document.createElement('div');
+    particle.className = 'smoke-particle';
+    particle.style.left = (Math.random() * 100) + '%';
+    particle.style.animationDuration = (3 + Math.random() * 4) + 's';
+    container.appendChild(particle);
+    count++;
+  }, 200);
+}
+
+// ============================================================
+//  DEAD PIXELS
+// ============================================================
+function addDeadPixels() {
+  for (let i = 0; i < 8; i++) {
+    const pixel = document.createElement('div');
+    pixel.className = 'dead-pixel';
+    const size = 2 + Math.random() * 4;
+    pixel.style.width = size + 'px';
+    pixel.style.height = size + 'px';
+    pixel.style.left = Math.random() * 100 + '%';
+    pixel.style.top = Math.random() * 100 + '%';
+    document.body.appendChild(pixel);
+  }
+}
+
+// ============================================================
+//  CONFETTI
+// ============================================================
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#ff0080', '#7b2ff7', '#00d2ff', '#ff6b35', '#ffd700', '#00ff88'];
+  for (let i = 0; i < 100; i++) {
+    setTimeout(() => {
+      const conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + '%';
+      conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+      conf.style.width = (5 + Math.random() * 10) + 'px';
+      conf.style.height = (5 + Math.random() * 10) + 'px';
+      conf.style.animationDuration = (2 + Math.random() * 3) + 's';
+      conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      container.appendChild(conf);
+    }, Math.random() * 2000);
+  }
+}
+
+// ============================================================
+//  FILE PATHS GENERATOR
+// ============================================================
+function generateFilePaths() {
+  if (device.isWindows) {
+    return [
+      'C:\\Windows\\System32\\ntoskrnl.exe',
+      'C:\\Windows\\System32\\drivers\\disk.sys',
+      'C:\\Windows\\System32\\config\\SYSTEM',
+      'C:\\Windows\\System32\\config\\SAM',
+      'C:\\Windows\\System32\\hal.dll',
+      'C:\\Windows\\System32\\kernel32.dll',
+      'C:\\Users\\' + 'User' + '\\Documents\\*.*',
+      'C:\\Windows\\System32\\csrss.exe',
+      'C:\\Windows\\System32\\winlogon.exe',
+      'C:\\Windows\\System32\\svchost.exe',
+      'C:\\Windows\\System32\\lsass.exe',
+      'C:\\Program Files\\*\\*.dll',
+      'C:\\Windows\\System32\\drivers\\ntfs.sys',
+      'C:\\Windows\\System32\\config\\SOFTWARE',
+      'C:\\Windows\\Boot\\BCD',
+      'C:\\Windows\\System32\\bootmgr',
+      'C:\\Users\\' + 'User' + '\\Desktop\\*.*',
+      'C:\\Users\\' + 'User' + '\\AppData\\Local\\*.*',
+      'C:\\Windows\\System32\\drivers\\volsnap.sys',
+      'C:\\$MFT',
+      'C:\\Windows\\System32\\config\\DEFAULT',
+      'C:\\Windows\\System32\\ntdll.dll',
+      'C:\\Users\\' + 'User' + '\\Downloads\\*.*',
+      'C:\\Windows\\System32\\drivers\\CLASSPNP.SYS',
+      'C:\\Recovery\\WindowsRE\\winre.wim',
+      'C:\\Windows\\System32\\config\\SECURITY',
+    ];
+  } else if (device.isMac || device.isIOS) {
+    return [
+      '/System/Library/Kernels/kernel',
+      '/System/Library/CoreServices/SystemVersion.plist',
+      '/private/var/db/dslocal/nodes/Default/',
+      '/Users/Shared/.ICEauthority',
+      '/System/Library/Extensions/*.kext',
+      '/Library/Preferences/SystemConfiguration/',
+      '/private/etc/passwd',
+      '/private/etc/master.passwd',
+      '/System/Library/Frameworks/Security.framework/',
+      '/Users/' + 'user' + '/Documents/*',
+      '/Users/' + 'user' + '/Desktop/*',
+      '/Users/' + 'user' + '/Library/Keychains/login.keychain-db',
+      '/System/Library/LaunchDaemons/*.plist',
+      '/private/var/folders/*/*/com.apple.dock.plist',
+      '/System/Library/CoreServices/Finder.app',
+      '/System/Library/CoreServices/Dock.app',
+      '/Users/' + 'user' + '/Library/Application Support/*',
+      '/System/Library/Frameworks/IOKit.framework/',
+      '/private/var/log/system.log',
+      '/usr/lib/dyld',
+      '/System/Library/CoreServices/loginwindow.app',
+      '/Users/' + 'user' + '/Downloads/*',
+      '/System/Library/PrivateFrameworks/*.framework',
+      '/System/Library/CoreServices/boot.efi',
+    ];
+  } else if (device.isLinux) {
+    return [
+      '/boot/vmlinuz',
+      '/boot/initrd.img',
+      '/boot/grub/grub.cfg',
+      '/etc/shadow',
+      '/etc/passwd',
+      '/etc/fstab',
+      '/etc/hosts',
+      '/home/' + 'user' + '/*',
+      '/usr/lib/systemd/systemd',
+      '/usr/bin/*',
+      '/var/log/syslog',
+      '/etc/ssh/sshd_config',
+      '/root/.ssh/authorized_keys',
+      '/dev/sda1',
+      '/proc/kcore',
+      '/usr/lib/x86_64-linux-gnu/libc.so.6',
+      '/usr/lib/x86_64-linux-gnu/libpthread.so.0',
+      '/etc/sudoers',
+      '/home/' + 'user' + '/Documents/*',
+      '/home/' + 'user' + '/.bashrc',
+      '/etc/systemd/system/*.service',
+      '/boot/efi/EFI/ubuntu/grubx64.efi',
+      '/usr/sbin/init',
+      '/home/' + 'user' + '/Desktop/*',
+    ];
+  } else if (device.isAndroid) {
+    return [
+      '/system/framework/framework.jar',
+      '/system/build.prop',
+      '/data/data/*',
+      '/system/app/*.apk',
+      '/system/lib/libandroid_runtime.so',
+      '/data/system/packages.xml',
+      '/system/bin/surfaceflinger',
+      '/data/user/0/*',
+      '/system/framework/services.jar',
+      '/system/lib/libart.so',
+      '/data/media/0/DCIM/*',
+      '/data/media/0/Download/*',
+      '/system/etc/permissions/platform.xml',
+      '/data/system/users/0/settings_secure.xml',
+      '/system/framework/core-oj.jar',
+      '/data/media/0/WhatsApp/Databases/*',
+      '/data/media/0/Pictures/*',
+      '/system/bin/app_process64',
+      '/data/system/locksettings.db',
+    ];
+  }
+  return ['/system/critical/file_' + Math.random().toString(36).substr(2, 8)];
+}
+
+// ============================================================
+//  LINUX KERNEL PANIC TEXT
+// ============================================================
+function getLinuxPanicText() {
+  return [
+    '[ 0.000000] Linux version 6.5.0-generic (buildd@server) (gcc-12 (Ubuntu 12.3.0-1ubuntu1~22.04) 12.3.0)',
+    '[ 0.000000] Command line: BOOT_IMAGE=/vmlinuz root=UUID=a1b2c3d4-e5f6-7890',
+    '[ 0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable',
+    '[ 0.000000] NX (Execute Disable) protection: active',
+    '[ 1.234567] CPU: Physical Processor ID: 0',
+    '[ 1.234567] CPU: Processor Core ID: 0',
+    '[ 1.340182] smpboot: CPU0: AMD Ryzen 7 5800X 8-Core Processor',
+    '[ 2.102843] PCI: Using configuration type 1 for base access',
+    '[ 2.567891] ACPI: Added _OSI(Module Device)',
+    '[ 3.012345] systemd[1]: Starting system...',
+    '[ 3.456789] EXT4-fs (sda1): mounted filesystem with ordered data mode',
+    '[ 3.789012] systemd[1]: Started Journal Service.',
+    '[ 4.123456] kernel: device eth0 entered promiscuous mode',
+    '',
+    '[ 4.567890] ------------[ cut here ]------------',
+    '[ 4.567891] WARNING: CPU: 0 PID: 1 at kernel/sched/core.c:3456',
+    '[ 4.567892] Modules linked in: nvidia(POE) snd_hda_intel iwlwifi',
+    '',
+    '[ 4.567900] BUG: unable to handle page fault for address: 0xffffffff82345678',
+    '[ 4.567901] #PF: supervisor read access in kernel mode',
+    '[ 4.567902] #PF: error_code(0x0000) - not-present page',
+    '[ 4.567903] PGD 4a0e067 P4D 4a0e067 PUD 4a10067 PMD 0',
+    '[ 4.567904] Oops: 0000 [#1] PREEMPT SMP NOPTI',
+    '[ 4.567905] CPU: 0 PID: 1 Comm: systemd Tainted: P           OE 6.5.0-generic',
+    '[ 4.567906] Hardware name: System manufacturer/Model',
+    '[ 4.567907] RIP: 0010:__schedule+0x2a5/0x810',
+    '[ 4.567908] RSP: 0018:ffffc90000013e60 EFLAGS: 00010046',
+    '[ 4.567909] RAX: 0000000000000000 RBX: ffff888100234500 RCX: 0000000000000000',
+    '[ 4.567910] RDX: 0000000000000001 RSI: ffffffff81a5e340 RDI: ffff888100234500',
+    '[ 4.567911] R13: ffff888100234500 R14: 0000000000000000 R15: 0000000000000000',
+    '',
+    '[ 4.567920] Kernel panic - not syncing: Fatal exception in interrupt',
+    '[ 4.567921] Kernel Offset: 0x1e00000 from 0xffffffff81000000',
+    '[ 4.567922] ---[ end Kernel panic - not syncing: Fatal exception in interrupt ]---',
+    '',
+    '[ 4.567930] Hardware Error: Machine Check Exception: 5 Bank 4: b200004000000800',
+    '[ 4.567931] TSC: 0 ADDR: 0x000000FFEE234000 MISC: 0x000000000000008a',
+    '[ 4.567932] PROCESSOR 0:a0652 TIME 1711929600 SOCKET 0 APIC 0 microcode 0xa0016',
+    '',
+    '⬛ Attempting to write system state...',
+    '⬛ FAILED: I/O error on write to /dev/sda1',
+    '⬛ File system corruption detected on /dev/sda1',
+    '⬛ Critical: Unable to sync filesystem',
+    '⬛ System halted.',
+  ];
+}
+
+// ============================================================
+//  MAIN PRANK SEQUENCE
+// ============================================================
+let prankStage = 0;
+
+function startPrank() {
+  initAudio();
+  goFullscreen();
+
+  // Disable all escape mechanisms
+  document.addEventListener('keydown', blockKeys, true);
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  window.onbeforeunload = () => "Your system is performing critical operations...";
+
+  // Start loading phase
+  showLoading();
+}
+
+function blockKeys(e) {
+  if (prankStage < 10) {
+    // Block Escape, F5, Ctrl+W, Ctrl+F4, Alt+F4, Ctrl+R
+    if (e.key === 'Escape' || e.key === 'F5' || 
+       (e.ctrlKey && (e.key === 'w' || e.key === 'r' || e.key === 'F4')) ||
+       (e.altKey && e.key === 'F4')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }
+}
+
+// ============================================================
+//  PHASE 1: Loading Screen (builds trust, then breaks it)
+// ============================================================
+function showLoading() {
+  document.getElementById('landing').style.display = 'none';
+  const ls = document.getElementById('loadingScreen');
+  ls.classList.add('active');
+
+  const messages = [
+    'Connecting to server...',
+    'Authenticating credentials...',
+    'Downloading package (2.4 MB)...',
+    'Verifying checksum...',
+    'Extracting files...',
+    'Configuring environment...',
+    'Installing dependencies...',
+    'Scanning system compatibility...',
+    'Accessing system resources...',
+    'Elevating privileges...',
+    'WARNING: Unexpected system access detected...',
+    'ERROR: Unauthorized kernel modification...',
+  ];
+
+  let progress = 0;
+  let msgIndex = 0;
+  const loadBar = document.getElementById('loadingBar');
+  const loadText = document.getElementById('loadingText');
+
+  const loadInterval = setInterval(() => {
+    progress += Math.random() * 8;
+    if (progress > 100) progress = 100;
+    loadBar.style.width = progress + '%';
+
+    if (msgIndex < messages.length && progress > (msgIndex / messages.length) * 100) {
+      loadText.textContent = messages[msgIndex];
+      
+      // Change color to red for warning messages
+      if (msgIndex >= 10) {
+        loadText.style.color = '#ff4444';
+        loadBar.style.background = 'linear-gradient(90deg, #ff4444, #ff0000)';
+        playGlitchSound();
+      }
+      msgIndex++;
+    }
+
+    if (progress >= 100) {
+      clearInterval(loadInterval);
+      setTimeout(() => {
+        ls.classList.remove('active');
+        startPhase2();
+      }, 800);
+    }
+  }, 300);
+}
+
+// ============================================================
+//  PHASE 2: Permission popup + Battery warning
+// ============================================================
+function startPhase2() {
+  prankStage = 2;
+  
+  // Show battery warning first
+  const bw = document.getElementById('batteryWarning');
+  bw.classList.add('active');
+  vibrateDevice([200, 100, 200]);
+  playErrorSound();
+
+  setTimeout(() => {
+    bw.classList.remove('active');
+    // Show permission dialog
+    document.getElementById('fakePermission').classList.add('active');
+  }, 2500);
+}
+
+function denyPermission() {
+  // Denying does nothing — show it again with scarier text
+  const fp = document.getElementById('fakePermission');
+  fp.querySelector('h3').textContent = '⛔ Access Cannot Be Denied';
+  fp.querySelector('p').textContent = 'A critical system process requires immediate access. Denying may result in permanent data loss. This action has been logged.';
+  fp.querySelector('.perm-deny').style.display = 'none';
+  
+  vibrateDevice([100, 50, 100, 50, 300]);
+  playAlarmSound();
+  
+  // Flash screen
+  document.body.classList.add('flicker');
+  setTimeout(() => document.body.classList.remove('flicker'), 300);
+}
+
+function allowPermission() {
+  document.getElementById('fakePermission').classList.remove('active');
+  startPhase3();
+}
+
+// ============================================================
+//  PHASE 3: Glitches + Dead pixels + Screen artifacts
+// ============================================================
+function startPhase3() {
+  prankStage = 3;
+  
+  addDeadPixels();
+  
+  // Start subtle glitches
+  document.getElementById('glitchOverlay').classList.add('active');
+  document.getElementById('screenTear').classList.add('active');
+  playGlitchSound();
+  vibrateDevice([50, 30, 50, 30, 50, 30, 100]);
+  
+  // Flash screen
+  document.body.classList.add('flicker');
+  setTimeout(() => document.body.classList.remove('flicker'), 300);
+
+  setTimeout(() => {
+    document.getElementById('glitchOverlay').classList.remove('active');
+    document.getElementById('screenTear').classList.remove('active');
+    startPhase4();
+  }, 3000);
+}
+
+// ============================================================
+//  PHASE 4: File deletion sequence (the real panic inducer)
+// ============================================================
+function startPhase4() {
+  prankStage = 4;
+  
+  const overlay = document.getElementById('fileDeleteOverlay');
+  overlay.classList.add('active');
+  
+  const container = document.getElementById('fileLines');
+  const paths = generateFilePaths();
+  
+  playAlarmSound();
+  vibrateDevice([500, 200, 500, 200, 500]);
+  
+  let i = 0;
+  const fileInterval = setInterval(() => {
+    if (i >= paths.length) {
+      clearInterval(fileInterval);
+      setTimeout(() => {
+        const errorLine = document.createElement('div');
+        errorLine.className = 'file-line';
+        errorLine.style.color = '#ff0000';
+        errorLine.style.fontSize = 'clamp(0.8rem, 2vw, 1rem)';
+        errorLine.style.marginTop = '15px';
+        errorLine.innerHTML = '⚠ CRITICAL: Boot sector corrupted. System cannot recover.<br>⚠ FILESYSTEM: Superblock destroyed. All data lost.<br>⚠ HARDWARE: Thermal limit exceeded. Emergency shutdown initiated.';
+        container.appendChild(errorLine);
+        
+        playAlarmSound();
+        vibrateDevice([1000, 200, 1000]);
+        
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          startPhase5();
+        }, 3000);
+      }, 1000);
+      return;
+    }
+    
+    const line = document.createElement('div');
+    line.className = 'file-line deleted';
+    const action = Math.random() > 0.3 ? 'DELETING' : 'CORRUPTING';
+    line.innerHTML = `<span style="color:#ff6600">[${action}]</span> ${paths[i]} ... <span style="color:#ff0000">DONE</span>`;
+    container.appendChild(line);
+    container.scrollTop = container.scrollHeight;
+    
+    if (i % 3 === 0) playGlitchSound();
+    if (i % 5 === 0) vibrateDevice([100]);
+    
+    i++;
+  }, 150);
+}
+
+// ============================================================
+//  PHASE 5: Overheat + Smoke effect
+// ============================================================
+function startPhase5() {
+  prankStage = 5;
+  
+  document.getElementById('overheatOverlay').classList.add('active');
+  startSmoke();
+  
+  // Intense vibration pattern for "overheating"
+  vibrateDevice([200, 100, 200, 100, 200, 100, 500, 200, 800]);
+  
+  playAlarmSound();
+  
+  setTimeout(() => {
+    document.getElementById('overheatOverlay').classList.remove('active');
+    document.getElementById('smokeContainer').classList.remove('active');
+    startPhase6();
+  }, 4000);
+}
+
+// ============================================================
+//  PHASE 6: Static noise -> Crash screen (OS-specific)
+// ============================================================
+function startPhase6() {
+  prankStage = 6;
+  
+  // Brief static noise
+  const sn = document.getElementById('staticNoise');
+  sn.classList.add('active');
+  renderStatic();
+  playGlitchSound();
+  vibrateDevice([300, 100, 300]);
+  
+  setTimeout(() => {
+    sn.classList.remove('active');
+    
+    // Screen goes black
+    document.body.style.background = '#000';
+    
+    setTimeout(() => {
+      showCrashScreen();
+    }, 2000);
+  }, 1500);
+}
+
+// ============================================================
+//  OS-SPECIFIC CRASH SCREENS
+// ============================================================
+function showCrashScreen() {
+  prankStage = 7;
+  
+  if (device.isAndroid) {
+    showAndroidCrash();
+  } else if (device.isIOS) {
+    showIOSCrash();
+  } else if (device.isWindows) {
+    showBSOD();
+  } else if (device.isMac) {
+    showKernelPanic();
+  } else if (device.isLinux) {
+    showLinuxPanic();
+  } else {
+    // Default to BSOD
+    showBSOD();
+  }
+}
+
+function showBSOD() {
+  generateQR();
+  const bsod = document.getElementById('bsod');
+  bsod.classList.add('active');
+  playErrorSound();
+  
+  let progress = 0;
+  const progressEl = document.getElementById('bsodProgress');
+  
+  const interval = setInterval(() => {
+    progress += Math.random() * 3;
+    if (progress > 99) {
+      progress = 0; // Reset! This makes it scarier
+      playGlitchSound();
+    }
+    progressEl.textContent = Math.floor(progress);
+  }, 500);
+  
+  // After some time, show "restarting" then reveal
+  setTimeout(() => {
+    clearInterval(interval);
+    progressEl.textContent = '100';
+    
+    setTimeout(() => {
+      bsod.classList.remove('active');
+      document.body.style.background = '#000';
+      
+      setTimeout(() => {
+        showReveal();
+      }, 2000);
+    }, 1500);
+  }, 12000);
+}
+
+function showKernelPanic() {
+  const kp = document.getElementById('kernelPanic');
+  kp.classList.add('active');
+  playErrorSound();
+  
+  setTimeout(() => {
+    kp.classList.remove('active');
+    document.body.style.background = '#000';
+    setTimeout(() => showReveal(), 2000);
+  }, 12000);
+}
+
+function showLinuxPanic() {
+  const lp = document.getElementById('linuxPanic');
+  lp.classList.add('active');
+  
+  const terminal = document.getElementById('linuxTerminal');
+  const lines = getLinuxPanicText();
+  
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= lines.length) {
+      clearInterval(interval);
+      setTimeout(() => {
+        lp.classList.remove('active');
+        document.body.style.background = '#000';
+        setTimeout(() => showReveal(), 2000);
+      }, 5000);
+      return;
+    }
+    
+    const line = document.createElement('div');
+    const isPanic = lines[i].includes('panic') || lines[i].includes('FAILED') || 
+                    lines[i].includes('Error') || lines[i].includes('BUG') ||
+                    lines[i].includes('Oops') || lines[i].includes('corruption') ||
+                    lines[i].includes('halted') || lines[i].includes('⬛');
+    line.className = isPanic ? 'panic-line' : '';
+    line.textContent = lines[i];
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+    
+    if (isPanic) {
+      playGlitchSound();
+      vibrateDevice([100]);
+    }
+    
+    i++;
+  }, 200);
+}
+
+function showAndroidCrash() {
+  const ac = document.getElementById('androidCrash');
+  ac.classList.add('active');
+  vibrateDevice([300, 200, 300]);
+  playErrorSound();
+}
+
+function androidClose() {
+  document.getElementById('androidCrash').classList.remove('active');
+  document.body.style.background = '#000';
+  
+  // Show loading spinner then BSOD-like screen
+  setTimeout(() => {
+    // Show brief static
+    const sn = document.getElementById('staticNoise');
+    sn.classList.add('active');
+    renderStatic();
+    vibrateDevice([500]);
+    
+    setTimeout(() => {
+      sn.classList.remove('active');
+      // Show the Android boot loop fear
+      const bootText = document.createElement('div');
+      bootText.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:1.2rem;z-index:250;text-align:center;';
+      bootText.innerHTML = '⚠️<br><br>Your device has been compromised.<br><br><span style="color:#ff4444;font-size:0.9rem;">Error: BOOT_PARTITION_CORRUPTED</span><br><span style="color:#666;font-size:0.8rem;">Contact manufacturer for recovery</span>';
+      document.body.appendChild(bootText);
+      
+      setTimeout(() => {
+        bootText.remove();
+        showReveal();
+      }, 8000);
+    }, 1500);
+  }, 1000);
+}
+
+function androidWait() {
+  // "Wait" doesn't help — escalate
+  const ac = document.getElementById('androidCrash');
+  ac.querySelector('h2').textContent = 'Multiple system processes not responding';
+  ac.querySelector('p').textContent = 'Your device may be permanently damaged. All running applications have been terminated.';
+  ac.querySelector('.android-btn').textContent = 'Force restart';
+  ac.querySelector('.android-btn').onclick = androidClose;
+  vibrateDevice([100, 50, 100, 50, 100, 50, 500]);
+  playAlarmSound();
+}
+
+function showIOSCrash() {
+  const ic = document.getElementById('iosCrash');
+  ic.classList.add('active');
+  
+  // iOS shows spinner, then black, then apple logo equivalent, then reveal
+  setTimeout(() => {
+    ic.classList.remove('active');
+    document.body.style.background = '#000';
+    
+    // Show fake recovery mode text
+    const recoveryText = document.createElement('div');
+    recoveryText.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:250;';
+    recoveryText.innerHTML = `
+      <div style="font-size:60px;margin-bottom:20px;">⚠️</div>
+      <div style="color:white;font-size:1rem;margin-bottom:10px;">iPhone is disabled</div>
+      <div style="color:#999;font-size:0.8rem;">Storage corrupted. Connect to computer to restore.</div>
+      <div style="color:#ff3b30;font-size:0.75rem;margin-top:15px;">Error 4013: Recovery failed</div>
+    `;
+    document.body.appendChild(recoveryText);
+    
+    setTimeout(() => {
+      recoveryText.remove();
+      showReveal();
+    }, 8000);
+  }, 5000);
+}
+
+// ============================================================
+//  FINAL REVEAL
+// ============================================================
+function showReveal() {
+  prankStage = 10;
+  
+  // Clean up
+  window.onbeforeunload = null;
+  document.removeEventListener('keydown', blockKeys, true);
+  document.querySelectorAll('.dead-pixel').forEach(p => p.remove());
+  
+  // Hide all crash screens
+  document.querySelectorAll('.bsod, .kernel-panic, .linux-panic, .mobile-crash, .file-delete-overlay, .glitch-overlay, .screen-tear, .overheat-overlay, .smoke-container, .static-noise').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // Black screen pause for dramatic effect
+  document.body.style.background = '#000';
+  
+  setTimeout(() => {
+    const reveal = document.getElementById('reveal');
+    reveal.classList.add('active');
+    launchConfetti();
+    
+    // Happy vibration
+    vibrateDevice([100, 50, 100, 50, 100, 50, 100, 50, 300]);
+    
+    // Play happy sound
+    if (audioCtx) {
+      try {
+        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.value = 0.1;
+          osc.start(audioCtx.currentTime + i * 0.15);
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.15);
+          gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.15 + 0.4);
+          osc.stop(audioCtx.currentTime + i * 0.15 + 0.4);
+        });
+      } catch(e) {}
+    }
+  }, 2000);
+}
+
+// ============================================================
+//  PREVENT COMMON ESCAPE ATTEMPTS
+// ============================================================
+
+// Disable pull-to-refresh on mobile
+document.body.addEventListener('touchmove', function(e) {
+  if (prankStage > 0 && prankStage < 10) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+// Catch back button
+window.addEventListener('popstate', function(e) {
+  if (prankStage > 0 && prankStage < 10) {
+    history.pushState(null, '', window.location.href);
+  }
+});
+history.pushState(null, '', window.location.href);
+
+// Handle visibility change (user switching tabs)
+document.addEventListener('visibilitychange', function() {
+  if (prankStage > 0 && prankStage < 10 && !document.hidden) {
+    // If they come back, hit them with another glitch
+    document.body.classList.add('flicker');
+    playGlitchSound();
+    vibrateDevice([200]);
+    setTimeout(() => document.body.classList.remove('flicker'), 300);
+  }
+});
+
+// Catch touch events on crash screens to prevent interaction
+document.addEventListener('touchstart', function(e) {
+  if (prankStage >= 6 && prankStage < 10) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+</script>
+</body>
+</html>
